@@ -273,6 +273,11 @@ class MooncakeTrace(AIPerfBaseModel):
         default=None,
         description="Per-turn extra fields shallow-merged into the request body at dispatch time. Keys override formatter defaults on collision.",
     )
+    audio_duration_ms: float | None = Field(
+        None,
+        description="Audio output duration in milliseconds for TTS models. "
+        "During replay, this is encoded to codec tokens using the TTS tokenizer.",
+    )
 
     @model_validator(mode="after")
     def validate_input(self) -> "MooncakeTrace":

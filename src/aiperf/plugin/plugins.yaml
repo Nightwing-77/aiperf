@@ -510,6 +510,16 @@ custom_dataset_loader:
       is_trace: true
       default_block_size: 512
 
+  tts_trace:
+    class: aiperf.dataset.loader.tts_trace:TTSTraceDatasetLoader
+    description: |
+      TTS trace loader that encodes audio duration to codec tokens using Qwen3 TTS tokenizer.
+      Extends MooncakeTraceDatasetLoader to convert audio_duration_ms to codec token counts
+      during replay for accurate TTS model benchmarking.
+    metadata:
+      is_trace: true
+      default_block_size: 512
+
   raw_payload:
     class: aiperf.dataset.loader.raw_payload:RawPayloadDatasetLoader
     description: |
