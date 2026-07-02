@@ -20,5 +20,3 @@ benchmark:
     concurrency: 1
     duration: 60s
     gracePeriod: 30s
-
-output_dir: ./tts_output
