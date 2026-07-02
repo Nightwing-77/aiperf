@@ -1,0 +1,21 @@
+schemaVersion: "2.0"
+
+benchmark:
+  model: Qwen/Qwen3-Audio-TTS
+  
+  endpoint:
+    url: http://localhost:8000/v1/tts
+    type: tts
+    streaming: false
+    
+  dataset:
+    type: file
+    path: ./input.jsonl
+    format: tts_trace
+    sampling: sequential
+    
+  phases:
+    type: fixed_schedule
+    autoOffset: true
+    concurrency: 1
+    gracePeriod: 30s

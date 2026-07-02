@@ -89,6 +89,8 @@ class TTSTokenizer(AIPerfLoggerMixin):
                 "TTSTokenizer not initialized. Call initialize() first."
             )
 
+        self.debug(f"Converting audio duration: {duration_ms}ms to codec tokens")
+
         # Generate silent audio of specified duration
         audio_samples = self._generate_silent_audio(duration_ms)
 
