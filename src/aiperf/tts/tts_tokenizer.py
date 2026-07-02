@@ -41,12 +41,19 @@ class TTSTokenizer(AIPerfLoggerMixin):
         except ImportError:
             return False
 
-    async def initialize(self, tokenizer_name: str = "Qwen/Qwen3-TTS-Tokenizer-12Hz") -> None:
+    async def initialize(self, tokenizer_name: str | None = None) -> None:
         """Initialize the Qwen3 TTS tokenizer.
 
         Args:
             tokenizer_name: HuggingFace model name for the tokenizer.
+                           If None, uses AIPERF_TTS_TOKENIZER env var or default.
         """
+        if tokenizer_name is None:
+            import os
+
+            tokenizer_name = os.getenv(
+                "AIPERF_TTS_TOKENIZER", "Qwen/Qwen3-TTS-Tokenizer-12Hz"
+            )
         if self._tokenizer is not None:
             return
 
