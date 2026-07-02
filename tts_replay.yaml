@@ -15,8 +15,6 @@ benchmark:
     sampling: sequential
     
   phases:
-    type: fixed_schedule
-    autoOffset: true
+    type: profiling
     concurrency: 1
     duration: 60s
-    gracePeriod: 30s
