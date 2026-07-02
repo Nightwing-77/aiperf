@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 """Qwen3 TTS tokenizer wrapper for audio codec token encoding."""
 
-import asyncio
 import tempfile
 from pathlib import Path
+from threading import Lock
 from typing import TYPE_CHECKING, Optional
 
 import numpy as np
@@ -30,7 +30,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
         self._tokenizer = None
         self._device = "cuda" if self._cuda_available() else "cpu"
         self._sample_rate = 24000  # Qwen3 TTS default sample rate
-        self._lock = asyncio.Lock()
+        self._lock = Lock()
 
     def _cuda_available(self) -> bool:
         """Check if CUDA is available."""
@@ -41,7 +41,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
         except ImportError:
             return False
 
-    async def initialize(self, tokenizer_name: Optional[str] = None) -> None:
+    def initialize(self, tokenizer_name: Optional[str] = None) -> None:
         """Initialize the Qwen3 TTS tokenizer.
 
         Args:
@@ -57,7 +57,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
         if self._tokenizer is not None:
             return
 
-        async with self._lock:
+        with self._lock:
             if self._tokenizer is not None:
                 return
 
@@ -66,8 +66,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
             try:
                 from qwen_tts import Qwen3TTSTokenizer
 
-                self._tokenizer = await asyncio.to_thread(
-                    Qwen3TTSTokenizer.from_pretrained,
+                self._tokenizer = Qwen3TTSTokenizer.from_pretrained(
                     tokenizer_name,
                     device_map=self._device,
                 )
@@ -79,7 +78,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
             except Exception as e:
                 raise TokenizerError(f"Failed to load TTS tokenizer: {e}") from e
 
-    async def duration_to_codec_tokens(self, duration_ms: float) -> int:
+    def duration_to_codec_tokens(self, duration_ms: float) -> int:
         """Convert audio duration to codec token count.
 
         Generates silent audio of the specified duration, encodes it using
@@ -110,9 +109,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
             sf.write(str(temp_path), audio_samples, self._sample_rate)
 
             # Encode audio to get codec tokens
-            encoder_output = await asyncio.to_thread(
-                self._tokenizer.encode, str(temp_path)
-            )
+            encoder_output = self._tokenizer.encode(str(temp_path))
 
             # Count tokens in audio_codes
             # encoder_output.audio_codes is a tensor of shape [batch, channels, tokens]
@@ -138,7 +135,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
         num_samples = int(duration_sec * self._sample_rate)
         return np.zeros(num_samples, dtype=np.float32)
 
-    async def shutdown(self) -> None:
+    def shutdown(self) -> None:
         """Shutdown the tokenizer and release resources."""
         if self._tokenizer is not None:
             self.info("Shutting down TTS tokenizer")
