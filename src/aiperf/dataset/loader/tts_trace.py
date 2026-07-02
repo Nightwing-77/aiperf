@@ -127,7 +127,7 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
                 break  # Only first session
 
         # Use base class logic for conversation building
-        return await super().convert_to_conversations(data)
+        return super().convert_to_conversations(data)
 
     def _estimate_codec_tokens_from_duration(self, duration_ms: float) -> int:
         """Fallback estimation of codec tokens from duration.
