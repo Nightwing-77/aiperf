@@ -3,7 +3,7 @@
 """TTS trace loader with codec token encoding using Qwen3 TTS tokenizer."""
 
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, Union
 
 from pydantic import ValidationError
 
@@ -49,9 +49,9 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
     def __init__(
         self,
         *,
-        filename: str | Path | None = None,
+        filename: Union[str, Path, None] = None,
         prompt_generator,
-        run: "BenchmarkRun" | None = None,
+        run: Optional["BenchmarkRun"] = None,
         **kwargs,
     ):
         super().__init__(

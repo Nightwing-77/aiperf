@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Literal, TypeVar
+from typing import Any, Literal, Optional, TypeVar
 
 from pydantic import ConfigDict, Field, model_validator
 
@@ -269,11 +269,11 @@ class MooncakeTrace(AIPerfBaseModel):
     session_id: str | None = Field(
         None, description="Unique identifier for the conversation session"
     )
-    extra: dict[str, Any] | None = Field(
+    extra: Optional[dict[str, Any]] = Field(
         default=None,
         description="Per-turn extra fields shallow-merged into the request body at dispatch time. Keys override formatter defaults on collision.",
     )
-    audio_duration_ms: float | None = Field(
+    audio_duration_ms: Optional[float] = Field(
         None,
         description="Audio output duration in milliseconds for TTS models. "
         "During replay, this is encoded to codec tokens using the TTS tokenizer.",
