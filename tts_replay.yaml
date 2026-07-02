@@ -15,6 +15,6 @@ benchmark:
     sampling: sequential
     
   phases:
-    type: profiling
+    type: constant
     concurrency: 1
     duration: 60s
