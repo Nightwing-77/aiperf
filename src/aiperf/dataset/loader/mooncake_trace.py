@@ -45,10 +45,15 @@ class MooncakeTraceDatasetLoader(BaseTraceDatasetLoader[MooncakeTrace]):
 
         For mooncake trace data, simply validate the data against the MooncakeTrace model.
         This will handle all of the validation logic for the different input combinations.
+        Reject TTS traces (those with audio_duration_ms) to avoid conflict with tts_trace loader.
         """
         if data is None:
             return False
         if is_speed_bench_row(data):
+            return False
+
+        # Reject TTS traces - they should be handled by tts_trace loader
+        if "audio_duration_ms" in data:
             return False
 
         try:
