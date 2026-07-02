@@ -48,16 +48,16 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
 
     def __init__(
         self,
-        run: "BenchmarkRun",
         *,
-        filename: str | None = None,
+        filename: str | Path | None = None,
         prompt_generator,
+        run: "BenchmarkRun" | None = None,
         **kwargs,
     ):
         super().__init__(
-            run=run,
             filename=filename,
             prompt_generator=prompt_generator,
+            run=run,
             **kwargs,
         )
         self.tts_tokenizer = TTSTokenizer(run=run)
