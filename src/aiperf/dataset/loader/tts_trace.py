@@ -19,6 +19,29 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
     codec token counts using the Qwen3 TTS tokenizer during replay.
     """
 
+    @classmethod
+    def can_load(
+        cls, data: LoaderProbeData | None = None, filename: str | Path | None = None
+    ) -> bool:
+        """Check if this loader can handle the given data format.
+
+        For TTS trace data, validate against MooncakeTrace model AND check for
+        audio_duration_ms field to distinguish from regular mooncake traces.
+        """
+        if data is None:
+            return False
+
+        # Must have audio_duration_ms to be a TTS trace
+        if "audio_duration_ms" not in data:
+            return False
+
+        # Still validate against MooncakeTrace model
+        try:
+            MooncakeTrace.model_validate(data)
+            return True
+        except ValidationError:
+            return False
+
     def __init__(
         self,
         run: "BenchmarkRun",
