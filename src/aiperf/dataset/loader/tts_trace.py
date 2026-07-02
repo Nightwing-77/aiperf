@@ -62,7 +62,7 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         )
         self.tts_tokenizer = TTSTokenizer(run=run)
 
-    async def convert_to_conversations(
+    def convert_to_conversations(
         self, data: dict[str, list[MooncakeTrace]]
     ) -> list:
         """Convert traces to conversations with codec token encoding.
@@ -78,8 +78,10 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         Returns:
             List of Conversation objects.
         """
+        import asyncio
+
         # Initialize TTS tokenizer once
-        await self.tts_tokenizer.initialize()
+        asyncio.run(self.tts_tokenizer.initialize())
 
         # Process each trace to convert duration → codec tokens
         total_traces = 0
@@ -91,8 +93,10 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
                 if trace.audio_duration_ms and not trace.output_length:
                     # Encode audio duration to get codec token count
                     try:
-                        codec_tokens = await self.tts_tokenizer.duration_to_codec_tokens(
-                            trace.audio_duration_ms
+                        codec_tokens = asyncio.run(
+                            self.tts_tokenizer.duration_to_codec_tokens(
+                                trace.audio_duration_ms
+                            )
                         )
                         trace.output_length = codec_tokens
                         converted_traces += 1
