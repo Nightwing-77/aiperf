@@ -142,6 +142,38 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         duration_sec = duration_ms / 1000
         return int(duration_sec * tokens_per_second)
 
+    def _build_turn(self, trace: MooncakeTrace, prompt: str) -> Turn:
+        """Build a Turn with raw_payload for TTS raw endpoint.
+
+        Overrides base method to construct raw_payload instead of texts,
+        since raw endpoint requires raw_payload on every turn.
+
+        Args:
+            trace: MooncakeTrace with audio_duration_ms converted to output_length.
+            prompt: Generated text prompt (ignored for raw payload).
+
+        Returns:
+            Turn with raw_payload set for TTS request.
+        """
+        from aiperf.common.models import Turn
+
+        # Construct raw payload for TTS request
+        # Format depends on the specific TTS API, but typically includes text and max_tokens
+        raw_payload = {
+            "text": prompt,
+            "max_tokens": trace.output_length,
+        }
+
+        # Add extra fields if present
+        if trace.extra:
+            raw_payload.update(trace.extra)
+
+        return Turn(
+            timestamp=getattr(trace, "timestamp", None),
+            delay=getattr(trace, "delay", None),
+            raw_payload=raw_payload,
+        )
+
     def shutdown(self) -> None:
         """Shutdown the TTS tokenizer and release resources."""
         self.tts_tokenizer.shutdown()
