@@ -517,7 +517,7 @@ custom_dataset_loader:
       Extends MooncakeTraceDatasetLoader to convert audio_duration_ms to codec token counts
       during replay for accurate TTS model benchmarking.
     metadata:
-      is_trace: true
+      is_trace: false
       default_block_size: 512
 
   raw_payload:
