@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Optional, Union
 
 from pydantic import ValidationError
 
+from aiperf.common.models import Turn
 from aiperf.dataset.loader.base_loader import LoaderProbeData
 from aiperf.dataset.loader.mooncake_trace import MooncakeTraceDatasetLoader
 from aiperf.dataset.loader.models import MooncakeTrace
@@ -155,8 +156,6 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         Returns:
             Turn with raw_payload set for TTS request.
         """
-        from aiperf.common.models import Turn
-
         # Construct raw payload for TTS request
         # Format depends on the specific TTS API, but typically includes text and max_tokens
         raw_payload = {
