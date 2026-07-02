@@ -5,7 +5,7 @@
 import asyncio
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 import numpy as np
 import soundfile as sf
@@ -41,7 +41,7 @@ class TTSTokenizer(AIPerfLoggerMixin):
         except ImportError:
             return False
 
-    async def initialize(self, tokenizer_name: str | None = None) -> None:
+    async def initialize(self, tokenizer_name: Optional[str] = None) -> None:
         """Initialize the Qwen3 TTS tokenizer.
 
         Args:
