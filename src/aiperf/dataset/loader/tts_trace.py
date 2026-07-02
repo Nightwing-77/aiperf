@@ -112,16 +112,18 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
             f"to codec tokens using TTS tokenizer"
         )
 
-        # Debug: Print sample conversion details
+        # Print sample conversion details (always visible)
         if converted_traces > 0:
+            print(f"\n[TTS Trace Conversion Details]")
             for session_id, traces in data.items():
                 for trace in traces[:3]:  # Print first 3 traces
                     if trace.audio_duration_ms and trace.output_length:
-                        self.debug(
-                            f"Trace: audio_duration_ms={trace.audio_duration_ms}ms "
+                        print(
+                            f"  Trace: audio_duration_ms={trace.audio_duration_ms}ms "
                             f"→ codec_tokens={trace.output_length}"
                         )
                 break  # Only first session
+            print()
 
         # Use base class logic for conversation building
         return super().convert_to_conversations(data)
@@ -166,6 +168,15 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         # Add extra fields if present
         if trace.extra:
             raw_payload.update(trace.extra)
+
+        # Print request details for visibility
+        print(f"\n[TTS Request Details]")
+        print(f"  Text: {prompt}")
+        print(f"  Max tokens (codec): {trace.output_length}")
+        print(f"  Raw payload: {raw_payload}")
+        print(f"  Timestamp: {getattr(trace, 'timestamp', None)}")
+        print(f"  Delay: {getattr(trace, 'delay', None)}")
+        print()
 
         return Turn(
             timestamp=getattr(trace, "timestamp", None),
