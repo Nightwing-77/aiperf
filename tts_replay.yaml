@@ -1,7 +1,7 @@
 schemaVersion: "2.0"
 
 benchmark:
-  model: Qwen/Qwen3-Audio-TTS
+  model: Qwen/Qwen3-TTS-Tokenizer-12Hz
   
   endpoint:
     url: http://localhost:8000/v1/tts
