@@ -246,11 +246,13 @@ class AioHttpClient(AIPerfLoggerMixin):
                         if is_binary:
                             raw_bytes = await response.read()
                             record.end_perf_ns = time.perf_counter_ns()
+                            # For TTS audio responses, skip storing binary data to avoid serialization errors
+                            # Store metadata only since we use --use-server-token-count
                             record.responses.append(
                                 BinaryResponse(
                                     perf_ns=record.end_perf_ns,
                                     content_type=content_type,
-                                    raw_bytes=raw_bytes,
+                                    raw_bytes=b"",  # Empty bytes to avoid UTF-8 serialization errors
                                 )
                             )
                         else:

@@ -349,26 +349,22 @@ class TextResponse:
             return None
 
 
-class BinaryResponse(AIPerfBaseModel):
+@dataclass(slots=True)
+class BinaryResponse:
     """Raw binary response from an inference client for non-text content types."""
 
-    model_config = ConfigDict(extra="forbid")
+    # Reject extra fields so Pydantic's union discrimination (e.g. in
+    # RequestRecord.responses) doesn't match the wrong dataclass type.
+    __pydantic_config__ = ConfigDict(extra="forbid")
 
-    perf_ns: int = Field(
-        ...,
-        description="The performance timestamp of the response in nanoseconds (perf_counter_ns).",
-    )
+    perf_ns: int
+    """The performance timestamp of the response in nanoseconds (perf_counter_ns)."""
 
-    raw_bytes: bytes = Field(
-        default=b"",
-        description="The raw binary body of the response. Excluded from serialization to avoid UTF-8 errors.",
-        exclude=True,
-    )
+    raw_bytes: bytes = field(default=b"", metadata={"pydantic_exclude": True})
+    """The raw binary body of the response. Excluded from serialization."""
 
-    content_type: str | None = Field(
-        default=None,
-        description="The content type of the response. e.g. 'video/mp4', 'application/octet-stream'.",
-    )
+    content_type: str | None = None
+    """The content type of the response. e.g. 'video/mp4', 'application/octet-stream'."""
 
     def get_raw(self) -> Any | None:
         """Get the raw representation of the response."""
