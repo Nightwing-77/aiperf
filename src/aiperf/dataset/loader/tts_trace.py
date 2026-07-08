@@ -8,14 +8,14 @@ from typing import TYPE_CHECKING, Optional, Union
 from pydantic import ValidationError
 
 from aiperf.common.models import Turn
-from aiperf.dataset.loader.base_loader import BaseLoader, LoaderProbeData
+from aiperf.dataset.loader.base_loader import BaseFileLoader, LoaderProbeData
 from aiperf.dataset.loader.models import MooncakeTrace
 
 if TYPE_CHECKING:
     from aiperf.config.resolution.plan import BenchmarkRun
 
 
-class TTSTraceDatasetLoader(BaseLoader):
+class TTSTraceDatasetLoader(BaseFileLoader):
     """TTS trace loader that encodes audio duration to codec tokens.
 
     Loads MooncakeTrace format with audio_duration_ms and converts it to
@@ -53,7 +53,6 @@ class TTSTraceDatasetLoader(BaseLoader):
         **kwargs,
     ):
         super().__init__(filename=filename, run=run, **kwargs)
-        # Don't initialize TTS tokenizer - we use estimation instead
 
     def load_dataset(self) -> dict[str, list[MooncakeTrace]]:
         """Load dataset from file and return traces grouped by session.
@@ -65,7 +64,7 @@ class TTSTraceDatasetLoader(BaseLoader):
 
         # Load and parse traces from file
         traces = []
-        with open(self.filename, "r") as f:
+        with open(self.filename, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     trace = MooncakeTrace.model_validate(json.loads(line))
