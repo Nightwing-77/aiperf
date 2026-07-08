@@ -159,11 +159,15 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
             Turn with raw_payload set for TTS request.
         """
         # Construct raw payload for TTS request
-        # Format depends on the specific TTS API, but typically includes text and max_tokens
+        # vLLM TTS API expects OpenAI-compatible format
         raw_payload = {
-            "text": prompt,
-            "max_tokens": trace.output_length,
+            "input": prompt,
+            "voice": "default",  # Default voice, can be overridden via trace.extra
         }
+
+        # Add max_tokens if specified (controls output length)
+        if trace.output_length:
+            raw_payload["max_tokens"] = trace.output_length
 
         # Add extra fields if present
         if trace.extra:
