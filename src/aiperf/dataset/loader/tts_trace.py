@@ -90,21 +90,16 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
             for trace in traces:
                 total_traces += 1
                 if trace.audio_duration_ms and not trace.output_length:
-                    # Encode audio duration to get codec token count
-                    try:
-                        codec_tokens = self.tts_tokenizer.duration_to_codec_tokens(
-                            trace.audio_duration_ms
-                        )
-                        trace.output_length = codec_tokens
-                        converted_traces += 1
-                    except Exception as e:
-                        self.error(
-                            f"Failed to convert audio duration to codec tokens "
-                            f"for trace with duration {trace.audio_duration_ms}ms: {e}"
-                        )
-                        # Fall back to estimation if encoding fails
-                        trace.output_length = self._estimate_codec_tokens_from_duration(
-                            trace.audio_duration_ms
+                    # Use estimation for performance - accurate enough for max_tokens
+                    # The TTS tokenizer encoding is too slow for large datasets
+                    trace.output_length = self._estimate_codec_tokens_from_duration(
+                        trace.audio_duration_ms
+                    )
+                    converted_traces += 1
+                    # Log progress every 100 traces
+                    if converted_traces % 100 == 0:
+                        self.info(
+                            f"Converted {converted_traces}/{total_traces} traces..."
                         )
 
         self.info(
