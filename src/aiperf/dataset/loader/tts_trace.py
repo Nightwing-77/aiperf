@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-"""TTS trace loader with codec token encoding using Qwen3 TTS tokenizer."""
+"""TTS trace loader with codec token encoding using estimation."""
 
-from collections import defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
@@ -11,7 +10,6 @@ from pydantic import ValidationError
 from aiperf.common.models import Turn
 from aiperf.dataset.loader.base_loader import BaseLoader, LoaderProbeData
 from aiperf.dataset.loader.models import MooncakeTrace
-from aiperf.tts.tts_tokenizer import TTSTokenizer
 
 if TYPE_CHECKING:
     from aiperf.config.resolution.plan import BenchmarkRun
@@ -21,7 +19,7 @@ class TTSTraceDatasetLoader(BaseLoader):
     """TTS trace loader that encodes audio duration to codec tokens.
 
     Loads MooncakeTrace format with audio_duration_ms and converts it to
-    codec token counts using the Qwen3 TTS tokenizer during replay.
+    codec token counts using estimation (12 tokens/second for Qwen3 TTS).
     """
 
     @classmethod
@@ -55,7 +53,7 @@ class TTSTraceDatasetLoader(BaseLoader):
         **kwargs,
     ):
         super().__init__(filename=filename, run=run, **kwargs)
-        self.tts_tokenizer = TTSTokenizer(run=run)
+        # Don't initialize TTS tokenizer - we use estimation instead
 
     def load_dataset(self) -> list:
         """Load dataset from file and convert to conversations.
@@ -66,9 +64,6 @@ class TTSTraceDatasetLoader(BaseLoader):
         import json
         from aiperf.common.models import Conversation
 
-        # Initialize TTS tokenizer
-        self.tts_tokenizer.initialize()
-
         # Load and parse traces from file
         traces = []
         with open(self.filename, "r") as f:
@@ -77,7 +72,7 @@ class TTSTraceDatasetLoader(BaseLoader):
                     trace = MooncakeTrace.model_validate(json.loads(line))
                     traces.append(trace)
 
-        # Convert audio_duration_ms to codec tokens
+        # Convert audio_duration_ms to codec tokens using estimation
         total_traces = len(traces)
         converted_traces = 0
 
@@ -91,7 +86,7 @@ class TTSTraceDatasetLoader(BaseLoader):
 
         self.info(
             f"Converted {converted_traces}/{total_traces} traces from audio duration "
-            f"to codec tokens using TTS tokenizer"
+            f"to codec tokens using estimation"
         )
 
         # Build conversations (one per trace for fixed schedule)
@@ -111,7 +106,6 @@ class TTSTraceDatasetLoader(BaseLoader):
             )
             conversations.append(conv)
 
-        self.tts_tokenizer.shutdown()
         return conversations
 
     def _estimate_codec_tokens_from_duration(self, duration_ms: float) -> int:

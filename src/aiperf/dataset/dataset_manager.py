@@ -135,16 +135,21 @@ class DatasetManager(ReplyClientMixin, BaseComponentService):
         endpoint_meta: EndpointMetadata = plugins.get_endpoint_metadata(
             self.run.cfg.endpoint.type
         )
-        if endpoint_meta.tokenizes_input:
+        if endpoint_meta.tokenizes_input and not self.run.cfg.endpoint.use_server_token_count:
             self.info("Configuring tokenizer(s) for dataset manager")
             begin = time.perf_counter()
             await self._configure_tokenizer()
             duration = time.perf_counter() - begin
             self.info(lambda: f"Tokenizer(s) configured in {duration:.2f} seconds")
         else:
-            self.info(
-                "Tokenization is disabled for this endpoint, skipping tokenizer configuration"
-            )
+            if self.run.cfg.endpoint.use_server_token_count:
+                self.info(
+                    "Tokenization is disabled due to --use-server-token-count, skipping tokenizer configuration"
+                )
+            else:
+                self.info(
+                    "Tokenization is disabled for this endpoint, skipping tokenizer configuration"
+                )
 
         self.info(lambda: f"Configuring dataset for {self.service_id}")
         begin = time.perf_counter()
