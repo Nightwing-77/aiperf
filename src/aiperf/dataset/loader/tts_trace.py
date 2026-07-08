@@ -55,14 +55,13 @@ class TTSTraceDatasetLoader(BaseLoader):
         super().__init__(filename=filename, run=run, **kwargs)
         # Don't initialize TTS tokenizer - we use estimation instead
 
-    def load_dataset(self) -> list:
-        """Load dataset from file and convert to conversations.
+    def load_dataset(self) -> dict[str, list[MooncakeTrace]]:
+        """Load dataset from file and return traces grouped by session.
 
         Returns:
-            List of Conversation objects.
+            Dict mapping session IDs to lists of MooncakeTrace objects.
         """
         import json
-        from aiperf.common.models import Conversation
 
         # Load and parse traces from file
         traces = []
@@ -89,10 +88,31 @@ class TTSTraceDatasetLoader(BaseLoader):
             f"to codec tokens using estimation"
         )
 
-        # Build conversations (one per trace for fixed schedule)
-        conversations = []
+        # Group traces by session (one per trace for fixed schedule)
+        data = {}
         for i, trace in enumerate(traces):
+            session_id = f"tts_session_{i}"
+            data[session_id] = [trace]
+
+        return data
+
+    def convert_to_conversations(
+        self, custom_data: dict[str, list[MooncakeTrace]]
+    ) -> list:
+        """Convert traces to conversations.
+
+        Args:
+            custom_data: Dict mapping session IDs to lists of MooncakeTrace objects.
+
+        Returns:
+            List of Conversation objects.
+        """
+        from aiperf.common.models import Conversation
+
+        conversations = []
+        for session_id, traces in custom_data.items():
             # Generate a simple prompt based on input_length
+            trace = traces[0]
             prompt = "Hello world" * (trace.input_length // 11 + 1)
             prompt = prompt[:trace.input_length]
 
@@ -101,7 +121,7 @@ class TTSTraceDatasetLoader(BaseLoader):
 
             # Create conversation
             conv = Conversation(
-                session_id=f"tts_session_{i}",
+                session_id=session_id,
                 turns=[turn],
             )
             conversations.append(conv)
