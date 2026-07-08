@@ -112,9 +112,16 @@ class TTSTokenizer(AIPerfLoggerMixin):
             encoder_output = self._tokenizer.encode(str(temp_path))
 
             # Count tokens in audio_codes
-            # encoder_output.audio_codes is a tensor of shape [batch, channels, tokens]
+            # encoder_output.audio_codes is a list of tensors: [tensor([frames, codebooks])]
+            # For Qwen3-TTS, the talker token count is the number of frames (first dimension)
             audio_codes = encoder_output.audio_codes
-            token_count = audio_codes.shape[-1]  # Last dimension is token sequence length
+            if isinstance(audio_codes, list):
+                # If it's a list, get the first element (batch of 1)
+                first_tensor = audio_codes[0]
+                token_count = first_tensor.shape[0]  # Number of frames (talker tokens)
+            else:
+                # If it's a tensor, use the first dimension (frames)
+                token_count = audio_codes.shape[0]  # Number of frames (talker tokens)
 
             return token_count
         finally:
