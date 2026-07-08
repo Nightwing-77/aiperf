@@ -68,16 +68,18 @@ class JMESPathResponseMixin:
 
         Resolution order:
 
-        1. If the response has no JSON body, fall back to the raw text body
+        1. If the response is a BinaryResponse (e.g., TTS audio), return a
+           ParsedResponse with placeholder data to mark it as successful.
+        2. If the response has no JSON body, fall back to the raw text body
            wrapped in ``TextResponseData`` (or ``None`` if both are empty).
-        2. If a ``response_field`` JMESPath query was compiled at init,
+        3. If a ``response_field`` JMESPath query was compiled at init,
            run it against the JSON; on a non-empty match, hand the value to
            ``convert_to_response_data`` for type detection.
-        3. If JMESPath produced no value (no query, empty match, or runtime
+        4. If JMESPath produced no value (no query, empty match, or runtime
            ``JMESPathError`` / ``TypeError`` — logged at warning, not re-raised),
            fall back to ``auto_detect_and_extract`` which probes for
            embeddings, rankings, then text in that order.
-        4. Wrap whatever we got in a ``ParsedResponse`` carrying
+        5. Wrap whatever we got in a ``ParsedResponse`` carrying
            ``response.perf_ns``; return ``None`` when no shape matched.
 
         Args:
@@ -87,6 +89,19 @@ class JMESPathResponseMixin:
             Parsed response with the most specific detected type, or ``None``
             when neither JMESPath nor auto-detection found extractable data.
         """
+        # Handle binary responses (e.g., TTS audio) - return placeholder data
+        # to mark as successful since we use --use-server-token-count
+        from aiperf.common.models.record_models import BinaryResponse
+
+        if isinstance(response, BinaryResponse):
+            from aiperf.common.models.base_models import BaseResponseData
+
+            # Return a placeholder response data to mark the request as successful
+            return ParsedResponse(
+                perf_ns=response.perf_ns,
+                data=BaseResponseData(content_type=response.content_type),
+            )
+
         json_obj = response.get_json()
         if not json_obj:
             if text := response.get_text():
