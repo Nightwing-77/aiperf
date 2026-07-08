@@ -51,7 +51,7 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         self,
         *,
         filename: Union[str, Path, None] = None,
-        prompt_generator,
+        prompt_generator=None,
         run: Optional["BenchmarkRun"] = None,
         **kwargs,
     ):
