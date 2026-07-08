@@ -518,7 +518,7 @@ custom_dataset_loader:
       during replay for accurate TTS model benchmarking.
     metadata:
       is_trace: true
-      default_block_size: 512
+      default_block_size: 16
 
   raw_payload:
     class: aiperf.dataset.loader.raw_payload:RawPayloadDatasetLoader
