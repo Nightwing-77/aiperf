@@ -257,7 +257,12 @@ class MooncakeTrace(AIPerfBaseModel):
     output_length: int | None = Field(
         None, description="The output sequence length of a request"
     )
-    hash_ids: list[int] | None = Field(None, description="The hash ids of a request")
+    hash_ids: list[int] | None = Field(
+        None,
+        description="The hash ids of a request",
+        validation_alias="mooncake_hashes",
+        serialization_alias="hash_ids",
+    )
     timestamp: int | float | None = Field(
         None,
         description="The timestamp of a request in milliseconds. Supports floating point, but scheduling accuracy is at the millisecond level.",
@@ -298,9 +303,9 @@ class MooncakeTrace(AIPerfBaseModel):
                 "'input_length', 'text_input', 'messages', and 'payload' are mutually exclusive. Use only one of them."
             )
 
-        if self.hash_ids is not None and self.input_length is None:
+        if self.hash_ids is not None and self.input_length is None and self.audio_duration_ms is None:
             raise ValueError(
-                "'hash_ids' is only allowed when 'input_length' is provided, not when 'text_input', 'messages', or 'payload' are provided"
+                "'hash_ids' is only allowed when 'input_length' or 'audio_duration_ms' is provided, not when 'text_input', 'messages', or 'payload' are provided"
             )
 
         return self
