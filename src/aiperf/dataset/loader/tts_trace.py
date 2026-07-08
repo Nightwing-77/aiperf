@@ -162,7 +162,7 @@ class TTSTraceDatasetLoader(MooncakeTraceDatasetLoader):
         # vLLM TTS API expects OpenAI-compatible format
         raw_payload = {
             "input": prompt,
-            "voice": "default",  # Default voice, can be overridden via trace.extra
+            "voice": "aiden",  # Default voice, can be overridden via trace.extra
         }
 
         # Add max_tokens if specified (controls output length)
