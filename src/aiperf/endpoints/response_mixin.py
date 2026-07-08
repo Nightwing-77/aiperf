@@ -91,11 +91,9 @@ class JMESPathResponseMixin:
         """
         # Handle binary responses (e.g., TTS audio) - return placeholder data
         # to mark as successful since we use --use-server-token-count
-        from aiperf.common.models.record_models import BinaryResponse
+        from aiperf.common.models.record_models import BinaryResponse, BaseResponseData
 
         if isinstance(response, BinaryResponse):
-            from aiperf.common.models.base_models import BaseResponseData
-
             # Return a placeholder response data to mark the request as successful
             return ParsedResponse(
                 perf_ns=response.perf_ns,
