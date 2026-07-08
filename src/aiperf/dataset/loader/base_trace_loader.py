@@ -99,7 +99,7 @@ class BaseTraceDatasetLoader(BaseFileLoader, Generic[TraceT]):
         tokenizer_cfg = self.run.cfg.tokenizer
         model_names = self.run.cfg.get_model_names()
         self._tokenizer_name = (
-            getattr(prompt_generator.tokenizer, "resolved_name", None)
+            (getattr(prompt_generator, "tokenizer", None) and getattr(prompt_generator.tokenizer, "resolved_name", None))
             or (tokenizer_cfg.name if tokenizer_cfg is not None else None)
             or (model_names[0] if model_names else "")
         )
