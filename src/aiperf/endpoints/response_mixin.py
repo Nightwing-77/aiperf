@@ -97,7 +97,7 @@ class JMESPathResponseMixin:
             # Return a placeholder response data to mark the request as successful
             return ParsedResponse(
                 perf_ns=response.perf_ns,
-                data=BaseResponseData(content_type=response.content_type),
+                data=BaseResponseData(),
             )
 
         json_obj = response.get_json()
