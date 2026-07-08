@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Optional, Union
 from pydantic import ValidationError
 
 from aiperf.common.models import Turn
+from aiperf.dataset.generator.prompt import PromptGenerator
 from aiperf.dataset.loader.base_loader import BaseFileLoader, LoaderProbeData
 from aiperf.dataset.loader.models import MooncakeTrace
 
@@ -53,6 +54,29 @@ class TTSTraceDatasetLoader(BaseFileLoader):
         **kwargs,
     ):
         super().__init__(filename=filename, run=run, **kwargs)
+        # Initialize prompt generator for synthetic text generation
+        # This requires a tokenizer, so --use-server-token-count cannot be used
+        from aiperf.common.tokenizer import Tokenizer
+
+        tokenizer_config = self.run.cfg.tokenizer
+        model_name = self.run.cfg.get_model_names()[0]
+        tokenizer_name = tokenizer_config.get_tokenizer_name_for_model(model_name)
+
+        self.tokenizer = Tokenizer.from_pretrained(
+            tokenizer_name,
+            trust_remote_code=tokenizer_config.trust_remote_code,
+            revision=tokenizer_config.revision,
+            resolve_alias=tokenizer_config.should_resolve_alias,
+        )
+
+        # Create prompt generator with default prompts config
+        from aiperf.config.schema import PromptConfig
+
+        prompts_config = PromptConfig(isl=128)
+        self.prompt_generator = PromptGenerator(
+            prompts=prompts_config,
+            tokenizer=self.tokenizer,
+        )
 
     def load_dataset(self) -> dict[str, list[MooncakeTrace]]:
         """Load dataset from file and return traces grouped by session.
@@ -110,10 +134,9 @@ class TTSTraceDatasetLoader(BaseFileLoader):
 
         conversations = []
         for session_id, traces in custom_data.items():
-            # Generate a simple prompt based on input_length
+            # Generate synthetic text using prompt generator
             trace = traces[0]
-            prompt = "Hello world" * (trace.input_length // 11 + 1)
-            prompt = prompt[:trace.input_length]
+            prompt = self.prompt_generator.generate(mean=trace.input_length)
 
             # Build turn with raw_payload
             turn = self._build_turn(trace, prompt)
