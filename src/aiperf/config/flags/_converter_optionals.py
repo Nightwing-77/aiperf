@@ -18,6 +18,7 @@ from aiperf.config.flags._section_fields import (
     ACCURACY_FIELDS,
     SWEEPING_FIELDS,
     TOKENIZER_FIELDS,
+    WER_CER_FIELDS,
 )
 from aiperf.config.flags._section_fields import SWEEPING_FIELDS as _SWEEPING_FIELD_NAMES
 from aiperf.config.flags.recipes import (
@@ -75,6 +76,31 @@ def build_accuracy(cli: CLIConfig) -> dict[str, Any] | None:
     out: dict[str, Any] = {}
     for cli_attr, aiperf_key in field_map:
         if cli_attr in acc_set:
+            out[aiperf_key] = getattr(cli, cli_attr)
+    return out or None
+
+
+def build_wer_cer(cli: CLIConfig) -> dict[str, Any] | None:
+    """Build the wer_cer section dict from explicitly-set CLIConfig fields.
+
+    Returns ``None`` when no wer_cer fields were explicitly populated (so the
+    converter skips the section entirely).
+    """
+    wer_cer_set = cli.model_fields_set & WER_CER_FIELDS
+    if not wer_cer_set:
+        return None
+    # Map flattened CLIConfig attribute -> AIPerfConfig wer_cer key. The CLI
+    # attrs carry an ``wer_cer_`` prefix to keep the flat namespace
+    # collision-free; the AIPerfConfig schema strips the prefix.
+    field_map = (
+        ("wer_cer_enabled", "enabled"),
+        ("wer_cer_service_url", "service_url"),
+        ("wer_cer_language", "language"),
+        ("wer_cer_timeout", "timeout"),
+    )
+    out: dict[str, Any] = {}
+    for cli_attr, aiperf_key in field_map:
+        if cli_attr in wer_cer_set:
             out[aiperf_key] = getattr(cli, cli_attr)
     return out or None
 

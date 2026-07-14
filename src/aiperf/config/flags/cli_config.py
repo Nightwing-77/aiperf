@@ -3554,6 +3554,59 @@ class CLIConfig(BaseConfig):
     ] = False
 
     ##############################################################################
+    # WER/CER
+    ##############################################################################
+    wer_cer_enabled: Annotated[
+        bool,
+        Field(
+            description="Enable WER/CER evaluation for TTS audio quality. "
+            "When True, evaluates TTS audio responses using a standalone Whisper-based service.",
+        ),
+        CLIParameter(
+            name=("--wer-cer-enabled",),
+            group=Groups.ACCURACY,
+        ),
+    ] = False
+
+    wer_cer_service_url: Annotated[
+        str,
+        Field(
+            description="URL of the standalone WER/CER evaluation service. "
+            "The service should expose an /evaluate_json endpoint accepting "
+            "base64-encoded audio data and reference text.",
+        ),
+        CLIParameter(
+            name=("--wer-cer-service-url",),
+            group=Groups.ACCURACY,
+        ),
+    ] = "http://localhost:8001"
+
+    wer_cer_language: Annotated[
+        str,
+        Field(
+            description="Language code for Whisper transcription (e.g., 'en', 'ja', 'zh'). "
+            "Passed to the evaluation service for language-specific transcription.",
+        ),
+        CLIParameter(
+            name=("--wer-cer-language",),
+            group=Groups.ACCURACY,
+        ),
+    ] = "en"
+
+    wer_cer_timeout: Annotated[
+        float,
+        Field(
+            ge=1.0,
+            description="Timeout in seconds for HTTP requests to the WER/CER evaluation service. "
+            "Should be set based on expected audio length and Whisper model size.",
+        ),
+        CLIParameter(
+            name=("--wer-cer-timeout",),
+            group=Groups.ACCURACY,
+        ),
+    ] = 30.0
+
+    ##############################################################################
     # Service
     ##############################################################################
     log_level: Annotated[

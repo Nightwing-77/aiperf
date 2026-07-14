@@ -26,6 +26,7 @@ from aiperf.config.flags._converter_optionals import (
     build_multi_run,
     build_sweep,
     build_tokenizer,
+    build_wer_cer,
     expand_search_recipe,
     resolve_auto_plot,
 )
@@ -101,6 +102,8 @@ def _assemble_optional(
         nested["tokenizer"] = tok
     if acc := build_accuracy(cli):
         nested["accuracy"] = acc
+    if wer_cer := build_wer_cer(cli):
+        nested["wer_cer"] = wer_cer
     if mr := build_multi_run(cli, recipe_output=recipe_output):
         nested["multi_run"] = mr
     if sweep := build_sweep(cli, recipe_output=recipe_output):

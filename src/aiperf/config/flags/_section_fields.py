@@ -246,3 +246,12 @@ ACCURACY_FIELDS: frozenset[str] = frozenset(
         "accuracy_verbose",
     }
 )
+
+WER_CER_FIELDS: frozenset[str] = frozenset(
+    {
+        "wer_cer_enabled",
+        "wer_cer_service_url",
+        "wer_cer_language",
+        "wer_cer_timeout",
+    }
+)

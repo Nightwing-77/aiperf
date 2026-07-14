@@ -40,6 +40,9 @@ from aiperf.common.aiperf_logger import AIPerfLogger
 from aiperf.config.accuracy import (
     AccuracyConfig,
 )
+from aiperf.config.wer_cer import (
+    WERCERConfig,
+)
 from aiperf.config.artifacts import (
     ArtifactsConfig,
 )
@@ -385,6 +388,15 @@ class BenchmarkConfig(BaseConfig, BenchmarkHelpersMixin):
             default=None,
             description="Accuracy benchmarking configuration. "
             "When set, enables accuracy evaluation alongside performance profiling.",
+        ),
+    ]
+
+    wer_cer: Annotated[
+        WERCERConfig,
+        Field(
+            default_factory=WERCERConfig,
+            description="WER/CER evaluation configuration for TTS audio quality. "
+            "When enabled, evaluates TTS audio responses using a standalone Whisper-based service.",
         ),
     ]
 

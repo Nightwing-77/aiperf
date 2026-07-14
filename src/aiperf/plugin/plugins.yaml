@@ -977,6 +977,13 @@ record_processor:
       Accuracy record processor that grades LLM responses against ground truth
       for accuracy benchmarking. Self-disables when accuracy mode is off.
 
+  wer_cer_record:
+    class: aiperf.tts.wer_cer_record_processor:WERCERRecordProcessor
+    description: |
+      WER/CER record processor that evaluates TTS audio quality using a standalone
+      Whisper-based evaluation service. Computes Word Error Rate (WER) and Character
+      Error Rate (CER) for TTS audio responses. Self-disables when wer_cer mode is off.
+
   outputs_json:
     class: aiperf.post_processors.outputs_json_record_processor:OutputsJsonRecordProcessor
     description: |
