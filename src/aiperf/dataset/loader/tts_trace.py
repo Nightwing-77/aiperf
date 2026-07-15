@@ -69,8 +69,14 @@ class TTSTraceDatasetLoader(BaseFileLoader):
             resolve_alias=tokenizer_config.should_resolve_alias,
         )
 
-        # Create prompt generator with default prompts config
-        from aiperf.config.schema import PromptConfig
+        # Create prompt generator with default prompts conf
+        from aiperf.config.dataset.content import (
+            AudioConfig,
+            ImageConfig,
+            PrefixPromptConfig,
+            PromptConfig,
+            RankingsConfig,
+        )
 
         prompts_config = PromptConfig(isl=128)
         self.prompt_generator = PromptGenerator(
