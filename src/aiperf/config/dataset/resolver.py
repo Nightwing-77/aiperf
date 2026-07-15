@@ -226,6 +226,7 @@ class DatasetResolver:
             str(
                 DatasetFormat.SAGEMAKER_DATA_CAPTURE
             ): CustomDatasetType.SAGEMAKER_DATA_CAPTURE,
+            "tts_trace": "tts_trace",  # TTS trace format
         }
 
     @staticmethod
@@ -326,6 +327,11 @@ class DatasetResolver:
             # BurstGPT is CSV; the loader enforces a ``Timestamp`` column at
             # load time (see ``BurstGPTTraceDatasetLoader._REQUIRED_COLUMNS``),
             # so the dataset cannot load without timing.
+            return True
+        # Check for TTS_TRACE by string comparison since enum might not be regenerated yet
+        if str(dataset_type) == "tts_trace":
+            # TTS trace loader adds default timing values (timestamp=0, delay=0)
+            # when not present in the trace, so it always produces timing data.
             return True
 
         record = first_record
