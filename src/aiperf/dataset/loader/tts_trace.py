@@ -81,6 +81,7 @@ class TTSTraceDatasetLoader(BaseFileLoader):
         prompts_config = PromptConfig(isl=128)
         self.prompt_generator = PromptGenerator(
             prompts=prompts_config,
+            prefix_prompts=None,
             tokenizer=self.tokenizer,
         )
 

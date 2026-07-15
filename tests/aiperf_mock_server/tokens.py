@@ -530,7 +530,7 @@ def _load_corpus() -> tuple[str, ...] | None:
                 trust_remote_code=server_config.tokenizer_trust_remote_code,
                 revision=server_config.tokenizer_revision,
             )
-            generator = PromptGenerator(config=PromptConfig(), tokenizer=tokenizer)
+            generator = PromptGenerator(prompts=PromptConfig(), prefix_prompts=None, tokenizer=tokenizer)
 
             # Fast batch conversion, replace BPE space marker (Ġ) with actual space
             raw_tokens = tokenizer._tokenizer.convert_ids_to_tokens(
