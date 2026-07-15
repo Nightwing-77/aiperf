@@ -201,7 +201,7 @@ class TTSTraceDatasetLoader(BaseFileLoader):
             raw_payload.update(trace.extra)
 
         return Turn(
-            timestamp=trace.timestamp,
-            delay=trace.delay,
+            timestamp=trace.timestamp if trace.timestamp is not None else 0,
+            delay=trace.delay if trace.delay is not None else 0,
             raw_payload=raw_payload,
         )
