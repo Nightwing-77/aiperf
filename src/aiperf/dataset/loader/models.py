@@ -286,23 +286,42 @@ class MooncakeTrace(AIPerfBaseModel):
 
     @model_validator(mode="after")
     def validate_input(self) -> "MooncakeTrace":
-        """Validate that exactly one input mode is provided."""
-        input_modes = [
-            self.input_length is not None,
+        """Validate that exactly one input mode is provided.
+
+        For TTS use cases, input_length (for text prompt) and audio_duration_ms (for output)
+        can be used together. Other combinations are mutually exclusive.
+        """
+        # Check for TTS-specific case: input_length + audio_duration_ms is allowed
+        tts_mode = self.input_length is not None and self.audio_duration_ms is not None
+        other_modes = [
             self.text_input is not None,
             self.messages is not None,
             self.payload is not None,
-            self.audio_duration_ms is not None,
         ]
-        input_mode_count = sum(input_modes)
-        if input_mode_count == 0:
+
+        if tts_mode and any(other_modes):
             raise ValueError(
-                "Exactly one of 'input_length', 'text_input', 'messages', 'payload', or 'audio_duration_ms' must be provided"
+                "TTS mode (input_length + audio_duration_ms) cannot be combined with text_input, messages, or payload"
             )
-        if input_mode_count > 1:
-            raise ValueError(
-                "'input_length', 'text_input', 'messages', 'payload', and 'audio_duration_ms' are mutually exclusive. Use only one of them."
-            )
+
+        # For non-TTS cases, enforce mutual exclusivity
+        if not tts_mode:
+            input_modes = [
+                self.input_length is not None,
+                self.text_input is not None,
+                self.messages is not None,
+                self.payload is not None,
+                self.audio_duration_ms is not None,
+            ]
+            input_mode_count = sum(input_modes)
+            if input_mode_count == 0:
+                raise ValueError(
+                    "Exactly one of 'input_length', 'text_input', 'messages', 'payload', or 'audio_duration_ms' must be provided"
+                )
+            if input_mode_count > 1:
+                raise ValueError(
+                    "'input_length', 'text_input', 'messages', 'payload', and 'audio_duration_ms' are mutually exclusive. Use only one of them."
+                )
 
         if self.hash_ids is not None and self.input_length is None and self.audio_duration_ms is None:
             raise ValueError(
