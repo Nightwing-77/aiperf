@@ -143,7 +143,9 @@ class TTSTraceDatasetLoader(BaseFileLoader):
         for session_id, traces in custom_data.items():
             # Generate synthetic text using prompt generator
             trace = traces[0]
-            prompt = self.prompt_generator.generate(mean=trace.input_length)
+            # Use default input length if not specified (TTS traces focus on audio_duration_ms)
+            input_length = trace.input_length if trace.input_length is not None else 128
+            prompt = self.prompt_generator.generate(mean=input_length)
 
             # Build turn with raw_payload
             turn = self._build_turn(trace, prompt)

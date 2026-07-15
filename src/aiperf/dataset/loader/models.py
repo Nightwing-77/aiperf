@@ -292,15 +292,16 @@ class MooncakeTrace(AIPerfBaseModel):
             self.text_input is not None,
             self.messages is not None,
             self.payload is not None,
+            self.audio_duration_ms is not None,
         ]
         input_mode_count = sum(input_modes)
         if input_mode_count == 0:
             raise ValueError(
-                "Exactly one of 'input_length', 'text_input', 'messages', or 'payload' must be provided"
+                "Exactly one of 'input_length', 'text_input', 'messages', 'payload', or 'audio_duration_ms' must be provided"
             )
         if input_mode_count > 1:
             raise ValueError(
-                "'input_length', 'text_input', 'messages', and 'payload' are mutually exclusive. Use only one of them."
+                "'input_length', 'text_input', 'messages', 'payload', and 'audio_duration_ms' are mutually exclusive. Use only one of them."
             )
 
         if self.hash_ids is not None and self.input_length is None and self.audio_duration_ms is None:
