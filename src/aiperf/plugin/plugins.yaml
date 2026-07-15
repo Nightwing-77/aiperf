@@ -516,6 +516,8 @@ custom_dataset_loader:
       TTS trace loader that encodes audio duration to codec tokens using Qwen3 TTS tokenizer.
       Loads MooncakeTrace format with audio_duration_ms and converts it to codec token counts
       during replay for accurate TTS model benchmarking.
+    metadata:
+      is_trace: true
 
   raw_payload:
     class: aiperf.dataset.loader.raw_payload:RawPayloadDatasetLoader
