@@ -145,7 +145,7 @@ class TTSTraceDatasetLoader(BaseFileLoader):
             trace = traces[0]
             # Use default input length if not specified (TTS traces focus on audio_duration_ms)
             input_length = trace.input_length if trace.input_length is not None else 128
-            prompt = self.prompt_generator.generate(mean=input_length)
+            prompt = self.prompt_generator.generate(mean=input_length, stddev=0)
 
             # Build turn with raw_payload
             turn = self._build_turn(trace, prompt)

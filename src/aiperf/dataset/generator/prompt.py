@@ -206,6 +206,9 @@ class PromptGenerator(BaseGenerator):
             mean: The mean of the normal distribution.
             stddev: The standard deviation of the normal distribution.
         """
+        # Convert None stddev to 0 for deterministic sampling
+        if stddev is None:
+            stddev = 0
 
         return self._length_rng.sample_positive_normal_integer(mean, stddev)
 
