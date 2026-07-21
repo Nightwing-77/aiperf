@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 import asyncio
 import contextlib
+import io
 import socket
 import time
+import wave
 from typing import TYPE_CHECKING, Any
 
 import aiohttp
@@ -25,6 +27,25 @@ from aiperf.transports.sse_utils import AsyncSSEStreamReader
 
 if TYPE_CHECKING:
     from aiperf.transports.base_transports import FirstTokenCallback
+
+
+def _decode_audio_duration_seconds(raw_bytes: bytes, content_type: str) -> float | None:
+    """Decode audio duration in seconds from a WAV response body.
+
+    Returns None for non-WAV audio (e.g. raw PCM, mp3) or malformed data, since
+    we have no reliable header to read the sample rate / frame count from.
+    """
+    if not raw_bytes or not content_type.startswith("audio/"):
+        return None
+    try:
+        with wave.open(io.BytesIO(raw_bytes), "rb") as wav_file:
+            frames = wav_file.getnframes()
+            rate = wav_file.getframerate()
+            if rate <= 0:
+                return None
+            return frames / rate
+    except (wave.Error, EOFError):
+        return None
 
 
 def _expected_request_body_size(data: Any) -> int | None:
@@ -246,6 +267,9 @@ class AioHttpClient(AIPerfLoggerMixin):
                         if is_binary:
                             raw_bytes = await response.read()
                             record.end_perf_ns = time.perf_counter_ns()
+                            audio_duration_seconds = _decode_audio_duration_seconds(
+                                raw_bytes, content_type
+                            )
                             # For TTS audio responses, skip storing binary data to avoid serialization errors
                             # Store metadata only since we use --use-server-token-count
                             record.responses.append(
@@ -253,6 +277,7 @@ class AioHttpClient(AIPerfLoggerMixin):
                                     perf_ns=record.end_perf_ns,
                                     content_type=content_type,
                                     raw_bytes=b"",  # Empty bytes to avoid UTF-8 serialization errors
+                                    audio_duration_seconds=audio_duration_seconds,
                                 )
                             )
                         else:

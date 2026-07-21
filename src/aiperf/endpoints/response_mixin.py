@@ -95,9 +95,16 @@ class JMESPathResponseMixin:
 
         if isinstance(response, BinaryResponse):
             # Return a placeholder response data to mark the request as successful
+            # since we use --use-server-token-count. Propagate the decoded audio
+            # duration (computed before raw_bytes was discarded) so downstream
+            # metrics like RTFx can use it.
             return ParsedResponse(
                 perf_ns=response.perf_ns,
                 data=BaseResponseData(),
+                metadata={
+                    "__audio_duration_seconds": response.audio_duration_seconds,
+                    "__content_type": response.content_type,
+                },
             )
 
         json_obj = response.get_json()

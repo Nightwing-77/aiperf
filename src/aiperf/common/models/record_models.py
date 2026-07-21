@@ -366,6 +366,11 @@ class BinaryResponse:
     content_type: str | None = None
     """The content type of the response. e.g. 'video/mp4', 'application/octet-stream'."""
 
+    audio_duration_seconds: float | None = None
+    """Duration in seconds of generated audio (e.g. TTS output), decoded from the WAV/PCM
+    header at receive time before raw_bytes is discarded. A plain float, unlike raw_bytes,
+    so it safely crosses the ZMQ boundary to the record processor for RTFx computation."""
+
     def get_raw(self) -> Any | None:
         """Get the raw representation of the response."""
         return self.raw_bytes

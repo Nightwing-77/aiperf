@@ -129,48 +129,45 @@ class WERCERRecordProcessor(AIPerfLifecycleMixin):
         audio_data = None
         reference_text = None
 
-        # Try to extract audio from response content
+        # Try to extract audio from response content. NOTE: raw TTS audio bytes
+        # are discarded by the transport before crossing the ZMQ boundary (only
+        # __audio_duration_seconds survives, for RTFx); this path only fires for
+        # endpoints that embed audio directly in a structured JSON payload.
         for resp in record.content_responses:
-            if resp.data:
-                # Check if response contains audio data
-                # This depends on the endpoint implementation
-                # For now, we'll look for audio in the raw response
-                if hasattr(resp, "raw_response") and resp.raw_response:
-                    raw_resp = resp.raw_response
-                    if isinstance(raw_resp, dict):
-                        # Try common audio field names
-                        for field in ["audio", "audio_data", "audio_bytes", "audio_content"]:
-                            if field in raw_resp:
-                                audio_data = raw_resp[field]
-                                if isinstance(audio_data, str):
-                                    # Assume base64 encoded
-                                    import base64
+            if not resp.data:
+                continue
+            if hasattr(resp, "raw_response") and resp.raw_response:
+                raw_resp = resp.raw_response
+                if isinstance(raw_resp, dict):
+                    for field in ["audio", "audio_data", "audio_bytes", "audio_content"]:
+                        if field in raw_resp:
+                            audio_data = raw_resp[field]
+                            if isinstance(audio_data, str):
+                                import base64
 
-                                    audio_data = base64.b64decode(audio_data)
-                                break
-
-                        # Try to get reference text
-                        for field in ["reference_text", "reference", "text", "prompt"]:
-                            if field in raw_resp:
-                                reference_text = raw_resp[field]
-                                break
-
-        # If not found in raw_response, try extra_body from metadata
-        if audio_data is None and hasattr(record, "extra_body"):
-            extra = record.extra_body or {}
-            for field in ["audio", "audio_data", "audio_bytes"]:
-                if field in extra:
-                    audio_data = extra[field]
-                    if isinstance(audio_data, str):
-                        import base64
-
-                        audio_data = base64.b64decode(audio_data)
+                                audio_data = base64.b64decode(audio_data)
+                            break
                     break
 
-            for field in ["reference_text", "reference", "text"]:
-                if field in extra:
-                    reference_text = extra[field]
-                    break
+        # Reference text: the TTS input prompt lives in the last request turn.
+        for turn in reversed(record.request.turns):
+            if turn.raw_payload:
+                for field in ["input", "text", "prompt"]:
+                    if field in turn.raw_payload:
+                        reference_text = turn.raw_payload[field]
+                        break
+            if reference_text is None and turn.texts:
+                text = turn.texts[0]
+                if text.contents:
+                    reference_text = text.contents[0]
+            if reference_text is None and turn.raw_messages:
+                for msg in reversed(turn.raw_messages):
+                    content = msg.get("content") if isinstance(msg, dict) else None
+                    if content:
+                        reference_text = content
+                        break
+            if reference_text is not None:
+                break
 
         return audio_data, reference_text
 
