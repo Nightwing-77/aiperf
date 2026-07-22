@@ -1,0 +1,39 @@
+# TTS Trace Replay: sample_5min_avg_load.jsonl
+#
+# Replays the recorded TTS workload trace with original timestamps.
+#
+# Usage:
+#   1. Start your TTS server on port 8000
+#   2. Run:
+#      aiperf profile --config examples/tts_replay_5min_avg_load.yaml
+
+random_seed: 42
+
+models:
+  - tts-test-model
+
+endpoint:
+  type: raw
+  urls:
+    - http://localhost:8000/v1/audio/speech
+  streaming: false
+
+tokenizer:
+  name: gpt2
+
+artifacts:
+  dir: ./artifacts/tts_replay_5min_avg_load
+
+datasets:
+  - name: tts_replay
+    type: file
+    format: tts_trace
+    path: ../sample_5min_avg_load.jsonl
+
+phases:
+  - name: profiling
+    type: fixed_schedule
+    auto_offset: true
+
+runtime:
+  ui: simple
