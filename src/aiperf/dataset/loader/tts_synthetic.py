@@ -233,6 +233,7 @@ class TTSSyntheticLoader(BaseFileLoader):
         raw_payload: dict[str, Any] = {
             "input": prompt,
             "voice": self._voice,
+            "response_format": "wav",
         }
 
         # vLLM-Omni's /v1/audio/speech accepts "max_new_tokens", not the OpenAI-chat

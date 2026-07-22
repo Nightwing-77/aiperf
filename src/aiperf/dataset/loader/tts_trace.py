@@ -162,7 +162,7 @@ class TTSTraceDatasetLoader(BaseFileLoader):
     def _estimate_codec_tokens_from_duration(self, duration_ms: float) -> int:
         """Estimation of codec tokens from duration.
 
-        Based on Qwen3 TTS codec parameters (12Hz, ~75 tokens/sec).
+        Based on Qwen3 TTS codec parameters (12Hz frame rate = 12 frames/sec).
 
         Args:
             duration_ms: Audio duration in milliseconds.
@@ -190,6 +190,7 @@ class TTSTraceDatasetLoader(BaseFileLoader):
         raw_payload = {
             "input": prompt,
             "voice": "aiden",  # Default voice, can be overridden via trace.extra
+            "response_format": "wav",
         }
 
         # Add max_new_tokens if specified (controls output length). vLLM-Omni's
