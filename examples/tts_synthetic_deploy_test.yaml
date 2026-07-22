@@ -1,0 +1,49 @@
+# AIPerf TTS Synthetic Deployment Test Config
+#
+# Generates 50 random TTS requests spread across a 5-minute window.
+# Each request has:
+#   - Random text length: 10-512 tokens (sampled from Shakespeare corpus)
+#   - Random audio duration: 1-10 seconds (converted to codec tokens at 12 tokens/sec)
+#   - Random timestamp: uniformly distributed within the 5-minute window
+#
+# Usage:
+#   aiperf benchmark --config examples/tts_synthetic_deploy_test.yaml
+#
+# Requirements:
+#   - A TTS inference server running (e.g., vLLM with Qwen3-TTS)
+#   - A tokenizer matching the model
+
+random_seed: 42
+
+models:
+  - Qwen/Qwen3-TTS
+
+endpoint:
+  type: completions
+  urls:
+    - http://localhost:8000/v1/audio/speech
+  streaming: false
+
+tokenizer:
+  name: Qwen/Qwen3-TTS
+
+datasets:
+  - name: tts_deploy_test
+    type: file
+    format: tts_synthetic
+    records:
+      - duration_sec: 300
+        num_requests: 50
+        input_length_min: 10
+        input_length_max: 512
+        audio_duration_min_ms: 1000
+        audio_duration_max_ms: 10000
+        voice: aiden
+
+phases:
+  - name: profiling
+    type: fixed_schedule
+    auto_offset: true
+
+runtime:
+  ui: simple

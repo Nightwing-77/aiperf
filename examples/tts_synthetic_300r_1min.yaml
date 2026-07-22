@@ -1,0 +1,42 @@
+# TTS Synthetic Test: 300 requests in 1 minute
+#
+# Usage:
+#   1. Start the logging server:
+#      uv run python scripts/tts_logging_server.py --port 8000
+#   2. Run this benchmark:
+#      uv run aiperf benchmark --config examples/tts_synthetic_300r_1min.yaml
+
+random_seed: 42
+
+models:
+  - tts-test-model
+
+endpoint:
+  type: completions
+  urls:
+    - http://localhost:8000/v1/audio/speech
+  streaming: false
+
+tokenizer:
+  name: gpt2
+
+datasets:
+  - name: tts_synthetic_300r
+    type: file
+    format: tts_synthetic
+    records:
+      - duration_sec: 60
+        num_requests: 300
+        input_length_min: 10
+        input_length_max: 512
+        audio_duration_min_ms: 500
+        audio_duration_max_ms: 5000
+        voice: aiden
+
+phases:
+  - name: profiling
+    type: fixed_schedule
+    auto_offset: true
+
+runtime:
+  ui: simple

@@ -191,10 +191,19 @@ class DatasetResolver:
             acc.session_counts[name] = total
 
         # Timing: detect from the first record's timestamp/delay fields.
-        acc.has_timing[name] = bool(
-            first is not None
-            and (first.get("timestamp") is not None or first.get("delay") is not None)
-        )
+        # Trace loaders that generate timing internally (tts_trace,
+        # tts_synthetic) always produce timing data even when the config
+        # record doesn't have timestamp/delay fields.
+        if str(dataset_type) in ("tts_trace", "tts_synthetic"):
+            acc.has_timing[name] = True
+        else:
+            acc.has_timing[name] = bool(
+                first is not None
+                and (
+                    first.get("timestamp") is not None
+                    or first.get("delay") is not None
+                )
+            )
 
     @staticmethod
     def _resolve_sampling(ds: object, dataset_type: object) -> object:
@@ -227,6 +236,7 @@ class DatasetResolver:
                 DatasetFormat.SAGEMAKER_DATA_CAPTURE
             ): CustomDatasetType.SAGEMAKER_DATA_CAPTURE,
             "tts_trace": "tts_trace",  # TTS trace format
+            "tts_synthetic": "tts_synthetic",  # TTS synthetic generator
         }
 
     @staticmethod
@@ -332,6 +342,10 @@ class DatasetResolver:
         if str(dataset_type) == "tts_trace":
             # TTS trace loader adds default timing values (timestamp=0, delay=0)
             # when not present in the trace, so it always produces timing data.
+            return True
+        if str(dataset_type) == "tts_synthetic":
+            # TTS synthetic loader generates random timestamps within the
+            # configured duration window, so it always produces timing data.
             return True
 
         record = first_record

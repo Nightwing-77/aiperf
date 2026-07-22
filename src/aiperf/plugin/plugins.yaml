@@ -519,6 +519,16 @@ custom_dataset_loader:
     metadata:
       is_trace: true
 
+  tts_synthetic:
+    class: aiperf.dataset.loader.tts_synthetic:TTSSyntheticLoader
+    description: |
+      Synthetic TTS workload generator for automated deployment testing.
+      Generates N random TTS requests with random text lengths, audio durations,
+      and timestamps within a configurable duration window. Uses inline records
+      for config (no file needed). Pair with fixed_schedule phase for replay.
+    metadata:
+      is_trace: true
+
   raw_payload:
     class: aiperf.dataset.loader.raw_payload:RawPayloadDatasetLoader
     description: |
