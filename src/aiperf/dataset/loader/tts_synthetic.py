@@ -235,8 +235,12 @@ class TTSSyntheticLoader(BaseFileLoader):
             "voice": self._voice,
         }
 
+        # vLLM-Omni's /v1/audio/speech accepts "max_new_tokens", not the OpenAI-chat
+        # "max_tokens" field; sending the latter is silently dropped and the server
+        # falls back to its default max_new_tokens (2048), massively overrunning
+        # short TTS requests.
         if trace.output_length:
-            raw_payload["max_tokens"] = trace.output_length
+            raw_payload["max_new_tokens"] = trace.output_length
 
         if trace.extra:
             raw_payload.update(trace.extra)

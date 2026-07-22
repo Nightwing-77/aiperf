@@ -236,7 +236,7 @@ class TestTTSSyntheticLoaderGeneration:
             assert turn.raw_payload is not None
             assert "input" in turn.raw_payload
             assert turn.raw_payload["voice"] == "aiden"
-            assert "max_tokens" in turn.raw_payload
+            assert "max_new_tokens" in turn.raw_payload
             assert turn.timestamp is not None
 
     def test_voice_override(self):

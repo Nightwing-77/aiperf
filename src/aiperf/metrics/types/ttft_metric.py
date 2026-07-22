@@ -43,8 +43,17 @@ class TTFTMetric(BaseRecordMetric[int]):
                 "Record must have at least one content response to calculate TTFT."
             )
 
+        first_response = record.content_responses[0]
+        if first_response.metadata.get("__content_type") is not None:
+            raise NoMetricValue(
+                "TTFT is undefined for non-streamed binary media responses (e.g. "
+                "TTS audio): the full payload is buffered and arrives as a single "
+                "response, so its timestamp equals the full request latency rather "
+                "than a true time-to-first-token."
+            )
+
         request_ts: int = record.request.start_perf_ns
-        first_response_ts: int = record.content_responses[0].perf_ns
+        first_response_ts: int = first_response.perf_ns
         if first_response_ts < request_ts:
             raise ValueError(
                 "First response timestamp is before request start timestamp, cannot compute TTFT."
