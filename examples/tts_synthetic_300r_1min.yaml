@@ -12,7 +12,7 @@ models:
   - tts-test-model
 
 endpoint:
-  type: completions
+  type: raw
   urls:
     - http://localhost:8000/v1/audio/speech
   streaming: false

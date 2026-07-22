@@ -19,7 +19,7 @@ models:
   - Qwen/Qwen3-TTS
 
 endpoint:
-  type: completions
+  type: raw
   urls:
     - http://localhost:8000/v1/audio/speech
   streaming: false
