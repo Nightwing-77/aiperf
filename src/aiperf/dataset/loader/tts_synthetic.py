@@ -44,7 +44,7 @@ class TTSSyntheticLoader(BaseFileLoader):
     - num_requests: Number of TTS requests to generate
     - input_length_min / input_length_max: Range for text token count
     - audio_duration_min_ms / audio_duration_max_ms: Range for audio output
-    - voice: TTS voice to use (default: "aiden")
+    - voice: TTS voice to use (default: "Vivian")
     """
 
     @classmethod
@@ -73,7 +73,7 @@ class TTSSyntheticLoader(BaseFileLoader):
         self._input_length_max: int = config["input_length_max"]
         self._audio_duration_min_ms: float = config["audio_duration_min_ms"]
         self._audio_duration_max_ms: float = config["audio_duration_max_ms"]
-        self._voice: str = config.get("voice", "aiden")
+        self._voice: str = config.get("voice", "Vivian")
 
         self._timestamp_rng = rng.derive("tts_synthetic.timestamp")
         self._input_length_rng = rng.derive("tts_synthetic.input_length")
@@ -233,6 +233,8 @@ class TTSSyntheticLoader(BaseFileLoader):
         raw_payload: dict[str, Any] = {
             "input": prompt,
             "voice": self._voice,
+            "language": "English",
+            "task_type": "CustomVoice",
             "response_format": "wav",
         }
 

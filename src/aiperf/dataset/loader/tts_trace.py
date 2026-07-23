@@ -189,7 +189,9 @@ class TTSTraceDatasetLoader(BaseFileLoader):
         # vLLM TTS API expects OpenAI-compatible format
         raw_payload = {
             "input": prompt,
-            "voice": "aiden",  # Default voice, can be overridden via trace.extra
+            "voice": "Vivian",
+            "language": "English",
+            "task_type": "CustomVoice",
             "response_format": "wav",
         }
 

@@ -235,7 +235,7 @@ class TestTTSSyntheticLoaderGeneration:
             turn = conv.turns[0]
             assert turn.raw_payload is not None
             assert "input" in turn.raw_payload
-            assert turn.raw_payload["voice"] == "aiden"
+            assert turn.raw_payload["voice"] == "Vivian"
             assert "max_new_tokens" in turn.raw_payload
             assert turn.timestamp is not None
 
